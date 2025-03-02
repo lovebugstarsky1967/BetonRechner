@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beton Rechner Thomas Karner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #ergebnis {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 5px solid #4CAF50;
+            white-space: pre-line;
+        }
+        .zusatz-info {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #erfolgsMeldung {
+            display: none;
+            padding: 10px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .aktion-gruppe {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 15px 0;
+            gap: 10px;
+        }
+        /* Responsive Anpassungen für kleine Bildschirme */
+        @media (max-width: 600px) {
+            .tab {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 5px;
+                border-radius: 4px;
+            }
+            .aktion-gruppe {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+        .file-input-wrapper {
+            margin: 15px 0;
+        }
+        .warning {
+            color: #721c24;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .success {
+            color: #155724;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Beton Rechner Thomas Karner</h1>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="wechsleTab('rechner')">Beton Rechner</div>
+        <div class="tab" onclick="wechsleTab('eigeneBetonsorten')">Eigene Betonsorten</div>
+        <div class="tab" onclick="wechsleTab('csvExportImport')">CSV Export/Import</div>
+    </div>
+    
+    <div id="rechner" class="tab-content active">
+        <div class="form-container">
+            <div class="form-group">
+                <label for="laenge">Länge (m):</label>
+                <input type="number" id="laenge" step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="breite">Breite (m):</label>
+                <input type="number" id="breite" step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="hoehe">Höhe/Dicke (m):</label>
+                <input type="number" id="hoehe" step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="betonart">Betonart:</label>
+                <select id="betonart" onchange="toggleDichteEingabe()">
+                    <option value="standard">Standardbeton</option>
+                    <option value="wasserdicht">Wasserdichter Beton</option>
+                    <option value="leicht_feuerfest">Leichter Feuerfestbeton</option>
+                    <option value="mittel_feuerfest">Mittelschwerer Feuerfestbeton</option>
+                    <option value="schwer_feuerfest">Schwerer Feuerfestbeton</option>
+                    <option value="custom">Eigene Dichte (Feuerfestbeton)</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="festigkeitsklasse-container">
+                <label for="festigkeitsklasse">Druckfestigkeitsklasse:</label>
+                <select id="festigkeitsklasse">
+                    <option value="">Bitte wählen</option>
+                    <option value="C8/10">C 8/10 (10 N/mm²)</option>
+                    <option value="C12/15">C 12/15 (15 N/mm²)</option>
+                    <option value="C16/20">C 16/20 (20 N/mm²)</option>
+                    <option value="C20/25">C 20/25 (25 N/mm²)</option>
+                    <option value="C25/30">C 25/30 (30 N/mm²)</option>
+                    <option value="C30/37">C 30/37 (37 N/mm²)</option>
+                    <option value="C35/45">C 35/45 (45 N/mm²)</option>
+                    <option value="C40/50">C 40/50 (50 N/mm²)</option>
+                    <option value="C45/55">C 45/55 (55 N/mm²)</option>
+                    <option value="C50/60">C 50/60 (60 N/mm²)</option>
+                    <option value="C55/67">C 55/67 (67 N/mm²)</option>
+                    <option value="C60/75">C 60/75 (75 N/mm²)</option>
+                    <option value="C70/85">C 70/85 (85 N/mm²)</option>
+                    <option value="C80/95">C 80/95 (95 N/mm²)</option>
+                    <option value="C90/105">C 90/105 (105 N/mm²)</option>
+                    <option value="C100/110">C 100/110 (115 N/mm²)</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="dichte-container" style="display: none;">
+                <label for="dichte">Dichte (kg/m³):</label>
+                <input type="number" id="dichte" min="0" step="10" placeholder="z.B. 1200 für leichten Feuerfestbeton">
+            </div>
+            
+            <div class="form-group">
+                <label for="hersteller">Hersteller/Bezeichnung:</label>
+                <input type="text" id="hersteller" placeholder="Optional">
+            </div>
+            
+            <div class="form-group">
+                <label for="preis">Preis pro Tonne (€):</label>
+                <input type="number" id="preis" step="0.01" min="0">
+            </div>
+            
+            <button type="button" onclick="berechneBeton()">Berechnen</button>
+        </div>
+        
+        <div id="ergebnis"></div>
+    </div>
+    
+    <div id="eigeneBetonsorten" class="tab-content">
+        <h2>Eigene Betonsorten verwalten</h2>
+        
+        <div id="erfolgsMeldung"></div>
+        
+        <form id="eigeneBetonsortForm">
+            <div class="form-group">
+                <label for="eigeneName">Name der Betonsorte:</label>
+                <input type="text" id="eigeneName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="eigeneHersteller">Hersteller:</label>
+                <input type="text" id="eigeneHersteller">
+            </div>
+            
+            <div class="form-group">
+                <label for="eigeneDichte">Dichte (kg/m³):</label>
+                <input type="number" id="eigeneDichte" step="10" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="eigenePreis">Preis pro Tonne (€):</label>
+                <input type="number" id="eigenePreis" step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="eigeneLagerbestand">Bestand im Lager vorhanden (Tonnen):</label>
+                <input type="number" id="eigeneLagerbestand" step="0.1" min="0" placeholder="0.0">
+            </div>
+            
+            <div class="form-group">
+                <label for="eigeneVerwendung">Verwendungszweck/Hinweise:</label>
+                <textarea id="eigeneVerwendung" rows="3"></textarea>
+            </div>
+            
+            <button type="button" onclick="fuegeEigeneBetonsortHinzu()">Betonsorte hinzufügen</button>
+            <button type="button" onclick="testSpeichern()">Test-Speichern</button>
+        </form>
+        
+        <h3>Gespeicherte Betonsorten</h3>
+        <table id="eigeneBetonsortTabelle">
+            <tr>
+                <td colspan="7">Keine eigenen Betonsorten vorhanden</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="csvExportImport" class="tab-content">
+        <h2>CSV Export/Import</h2>
+        
+        <div class="zusatz-info">
+            <p>Hier können Sie Ihre eigenen Betonsorten als CSV-Datei exportieren oder importieren. Dies ermöglicht Ihnen, Ihre Daten zu sichern oder zwischen verschiedenen Geräten zu übertragen.</p>
+        </div>
+        
+        <div class="aktion-gruppe">
+            <button type="button" onclick="exportiereAlsCSV()">Alle Betonsorten als CSV exportieren</button>
+            <button type="button" onclick="zeigeCSVVorschau()">CSV-Vorschau anzeigen</button>
+        </div>
+        
+        <div class="file-input-wrapper">
+            <label for="csvDatei">CSV-Datei importieren:</label>
+            <input type="file" id="csvDatei" accept=".csv,text/csv">
+        </div>
+        
+        <button type="button" onclick="importiereCSV()">Ausgewählte CSV-Datei importieren</button>
+        
+        <div id="csvVorschau" style="margin-top: 20px; display: none;">
+            <h3>CSV-Vorschau</h3>
+            <textarea id="csvVorschauText" rows="10" style="width: 100%; font-family: monospace;" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Globale Variable für benutzerdefinierte Betonsorten
+        let eigeneBetonsorten = [];
+        
+        // Beim Laden der Seite gespeicherte Betonsorten laden
+        window.addEventListener('load', function() {
+            console.log("Seite geladen, lade gespeicherte Betonsorten...");
+            ladeEigeneBetonsorten();
+            aktualisiereBetonsortenListe();
+            erstelleBetonsortenTabelle();
+            
+            // Event-Listener für die CSV-Datei-Auswahl
+            const csvDateiInput = document.getElementById('csvDatei');
+            if (csvDateiInput) {
+                csvDateiInput.addEventListener('change', zeigeCSVDateiName);
+            }
+        });
+        
+        // Funktion zum Wechseln zwischen Tabs
+        function wechsleTab(tabId) {
+            console.log("Tab wechseln zu:", tabId);
+            
+            // Alle Tabs deaktivieren
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Alle Tab-Inhalte ausblenden
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Ausgewählten Tab aktivieren
+            document.querySelector(`.tab[onclick="wechsleTab('${tabId}')"]`).classList.add('active');
+            
+            // Ausgewählten Tab-Inhalt anzeigen
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        // Funktion zum Laden der gespeicherten Betonsorten aus localStorage
+        function ladeEigeneBetonsorten() {
+            try {
+                const gespeicherteBetonsorten = localStorage.getItem('eigeneBetonsorten');
+                console.log("Geladene Daten aus localStorage:", gespeicherteBetonsorten);
+                
+                if (gespeicherteBetonsorten) {
+                    eigeneBetonsorten = JSON.parse(gespeicherteBetonsorten);
+                    console.log("Geparste Betonsorten:", eigeneBetonsorten);
+                } else {
+                    console.log("Keine gespeicherten Betonsorten gefunden");
+                    eigeneBetonsorten = [];
+                }
+            } catch (error) {
+                console.error("Fehler beim Laden der Betonsorten:", error);
+                eigeneBetonsorten = [];
+            }
+        }
+        
+        // Funktion zum Speichern der Betonsorten in localStorage
+        function speichereEigeneBetonsorten() {
+            try {
+                const daten = JSON.stringify(eigeneBetonsorten);
+                localStorage.setItem('eigeneBetonsorten', daten);
+                console.log("Betonsorten gespeichert:", daten);
+            } catch (error) {
+                console.error("Fehler beim Speichern der Betonsorten:", error);
+                alert("Fehler beim Speichern der Betonsorten. Möglicherweise ist der localStorage-Speicher voll oder deaktiviert.");
+            }
+        }
+        
+        // Funktion zum Aktualisieren der Dropdown-Liste mit eigenen Betonsorten
+        function aktualisiereBetonsortenListe() {
+            console.log("Aktualisiere Dropdown-Liste der Betonsorten");
+            
+            const betonartSelect = document.getElementById('betonart');
+            if (!betonartSelect) {
+                console.error("Dropdown-Element 'betonart' nicht gefunden!");
+                return;
+            }
+            
+            console.log("Aktuelle Anzahl eigener Betonsorten:", eigeneBetonsorten.length);
+            
+            // Bestehende eigene Betonsorten entfernen
+            const optionen = betonartSelect.options;
+            for (let i = optionen.length - 1; i >= 0; i--) {
+                if (optionen[i].value.startsWith('eigen_')) {
+                    betonartSelect.remove(i);
+                }
+            }
+            
+            // Trennlinien-Option mit ID entfernen, falls vorhanden
+            const existierendeTrennlinie = document.getElementById('trennlinie-betonsorten');
+            if (existierendeTrennlinie) {
+                existierendeTrennlinie.remove();
+            }
+            
+            // Wenn eigene Betonsorten vorhanden sind, Trennlinie hinzufügen
+            if (eigeneBetonsorten.length > 0) {
+                const trennlinie = document.createElement('option');
+                trennlinie.disabled = true;
+                trennlinie.id = 'trennlinie-betonsorten';
+                trennlinie.textContent = '----------------------';
+                betonartSelect.appendChild(trennlinie);
+                
+                // Eigene Betonsorten hinzufügen
+                eigeneBetonsorten.forEach((betonsorte, index) => {
+                    const option = document.createElement('option');
+                    option.value = 'eigen_' + index;
+                    option.textContent = betonsorte.name + ' (' + betonsorte.hersteller + ')';
+                    betonartSelect.appendChild(option);
+                });
+                
+                console.log("Betonsorten wurden zur Dropdown-Liste hinzugefügt");
+            }
+        }
+        
+        // Funktion zum Erstellen der Tabelle mit eigenen Betonsorten
+        function erstelleBetonsortenTabelle() {
+            console.log("Erstelle Tabelle der Betonsorten");
+            
+            const tabelle = document.getElementById('eigeneBetonsortTabelle');
+            if (!tabelle) {
+                console.error("Tabellenelement 'eigeneBetonsortTabelle' nicht gefunden!");
+                return;
+            }
+            
+            tabelle.innerHTML = '';
+            
+            if (!eigeneBetonsorten || eigeneBetonsorten.length === 0) {
+                console.log("Keine Betonsorten vorhanden");
+                tabelle.innerHTML = '<tr><td colspan="7">Keine eigenen Betonsorten vorhanden</td></tr>';
+                return;
+            }
+            
+            console.log("Anzahl der anzuzeigenden Betonsorten:", eigeneBetonsorten.length);
+            
+            // Tabellenkopf
+            const kopf = document.createElement('tr');
+            kopf.innerHTML = `
+                <th>Name</th>
+                <th>Hersteller</th>
+                <th>Dichte (kg/m³)</th>
+                <th>Preis (€/Tonne)</th>
+                <th>Lagerbestand (Tonnen)</th>
+                <th>Verwendung</th>
+                <th>Aktionen</th>
+            `;
+            tabelle.appendChild(kopf);
+            
+            // Tabellenzeilen für jede Betonsorte
+            eigeneBetonsorten.forEach((betonsorte, index) => {
+                const zeile = document.createElement('tr');
+                zeile.innerHTML = `
+                    <td>${betonsorte.name || 'k.A.'}</td>
+                    <td>${betonsorte.hersteller || 'k.A.'}</td>
+                    <td>${betonsorte.dichte || 'k.A.'}</td>
+                    <td>${betonsorte.preis > 0 ? betonsorte.preis : '-'}</td>
+                    <td>${betonsorte.lagerbestand > 0 ? betonsorte.lagerbestand.toFixed(1) : '0'}</td>
+                    <td>${betonsorte.verwendung || '-'}</td>
+                    <td>
+                        <button type="button" onclick="loescheBetonsorte(${index})">Löschen</button>
+                    </td>
+                `;
+                tabelle.appendChild(zeile);
+            });
+            
+            console.log("Tabelle wurde erstellt");
+        }
+        
+        // Funktion zum Hinzufügen einer eigenen Betonsorte
+        function fuegeEigeneBetonsortHinzu() {
+            console.log("Funktion zum Hinzufügen einer Betonsorte aufgerufen");
+            
+            const nameElement = document.getElementById('eigeneName');
+            const herstellerElement = document.getElementById('eigeneHersteller');
+            const dichteElement = document.getElementById('eigeneDichte');
+            const preisElement = document.getElementById('eigenePreis');
+            const lagerbestandElement = document.getElementById('eigeneLagerbestand');
+            const verwendungElement = document.getElementById('eigeneVerwendung');
+            
+            if (!nameElement || !dichteElement) {
+                console.error("Formularfelder nicht gefunden!");
+                alert('Fehler: Formularfelder nicht gefunden.');
+                return;
+            }
+            
+            const name = nameElement.value;
+            const hersteller = herstellerElement ? herstellerElement.value : '';
+            const dichte = parseFloat(dichteElement.value);
+            const preis = preisElement ? parseFloat(preisElement.value) : 0;
+            const lagerbestand = lagerbestandElement ? parseFloat(lagerbestandElement.value) : 0;
+            const verwendung = verwendungElement ? verwendungElement.value : '';
+            
+            console.log("Eingabewerte:", { name, hersteller, dichte, preis, lagerbestand, verwendung });
+            
+            if (!name || !dichte || isNaN(dichte)) {
+                alert('Bitte geben Sie mindestens einen Namen und eine gültige Dichte an.');
+                return;
+            }
+            
+            const neueBetonsorte = {
+                name: name,
+                hersteller: hersteller || 'Nicht angegeben',
+                dichte: dichte,
+                preis: isNaN(preis) ? 0 : preis,
+                lagerbestand: isNaN(lagerbestand) ? 0 : lagerbestand,
+                verwendung: verwendung || 'Keine Angabe'
+            };
+            
+            console.log("Neue Betonsorte:", neueBetonsorte);
+            
+            // Lokale Liste aktualisieren
+            eigeneBetonsorten.push(neueBetonsorte);
+            
+            // In localStorage speichern
+            speichereEigeneBetonsorten();
+            console.log("Gespeicherte Betonsorten:", eigeneBetonsorten);
+            
+            // UI aktualisieren
+            aktualisiereBetonsortenListe();
+            erstelleBetonsortenTabelle();
+            
+            // Formular zurücksetzen
+            const formular = document.getElementById('eigeneBetonsortForm');
+            if (formular) {
+                formular.reset();
+            }
+            
+            // Erfolgsmeldung anzeigen
+            const meldung = document.getElementById('erfolgsMeldung');
+            if (meldung) {
+                meldung.textContent = `${name} wurde erfolgreich hinzugefügt!`;
+                meldung.style.display = 'block';
+                
+                // Meldung nach 3 Sekunden ausblenden
+                setTimeout(() => {
+                    meldung.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // Testfunktion zum direkten Hinzufügen einer Betonsorte
+        function testSpeichern() {
+            console.log("Test-Speichern ausgeführt");
+            
+            const testBetonsorte = {
+                name: "Test-Beton " + new Date().toLocaleTimeString(),
+                hersteller: "Test-Hersteller",
+                dichte: 2200,
+                preis: 120,
+                lagerbestand: 5.5, // in Tonnen
+                verwendung: "Nur zum Testen"
+            };
+            
+            eigeneBetonsorten.push(testBetonsorte);
+            speichereEigeneBetonsorten();
+            aktualisiereBetonsortenListe();
+            erstelleBetonsortenTabelle();
+            
+            alert("Test-Betonsorte wurde hinzugefügt!");
+        }
+        
+        // Funktion zum Löschen einer Betonsorte
+        function loescheBetonsorte(index) {
+            console.log("Löschen der Betonsorte mit Index:", index);
+            
+            if (confirm(`Möchten Sie "${eigeneBetonsorten[index].name}" wirklich löschen?`)) {
+                eigeneBetonsorten.splice(index, 1);
+                speichereEigeneBetonsorten();
+                aktualisiereBetonsortenListe();
+                erstelleBetonsortenTabelle();
+            }
+        }
+        
+        // Funktion zum Umschalten der Dichteeingabe
+        function toggleDichteEingabe() {
+            const betonart = document.getElementById('betonart').value;
+            const dichteContainer = document.getElementById('dichte-container');
+            const festigkeitsklasseContainer = document.getElementById('festigkeitsklasse-container');
+            
+            if (betonart === 'custom' && dichteContainer) {
+                dichteContainer.style.display = 'block';
+                if (festigkeitsklasseContainer) {
+                    festigkeitsklasseContainer.style.display = 'none';
+                }
+            } else if (betonart.startsWith('eigen_')) {
+                if (dichteContainer) {
+                    dichteContainer.style.display = 'none';
+                }
+                if (festigkeitsklasseContainer) {
+                    festigkeitsklasseContainer.style.display = 'none';
+                }
+            } else {
+                if (dichteContainer) {
+                    dichteContainer.style.display = 'none';
+                }
+                if (festigkeitsklasseContainer) {
+                    festigkeitsklasseContainer.style.display = 'block';
+                }
+            }
+        }
+        
+        // Funktion zur Berechnung des Betons
+        function berechneBeton() {
+            console.log("Starte Betonberechnung...");
+            
+            try {
+                // Eingabewerte holen
+                const laengeInput = document.getElementById('laenge');
+                const breiteInput = document.getElementById('breite');
+                const hoeheInput = document.getElementById('hoehe');
+                const betonartSelect = document.getElementById('betonart');
+                const preisInput = document.getElementById('preis');
+                const herstellerInput = document.getElementById('hersteller');
+                
+                // Prüfen, ob alle Elemente existieren
+                if (!laengeInput || !breiteInput || !hoeheInput || !betonartSelect) {
+                    console.error("Ein oder mehrere Eingabefelder wurden nicht gefunden!");
+                    alert("Fehler: Ein oder mehrere Eingabefelder konnten nicht gefunden werden.");
+                    return;
+                }
+                
+                // Werte parsen
+                const laenge = parseFloat(laengeInput.value);
+                const breite = parseFloat(breiteInput.value);
+                const hoehe = parseFloat(hoeheInput.value);
+                const betonart = betonartSelect.value;
+                const preisProM3 = preisInput ? (parseFloat(preisInput.value) || 0) : 0;
+                const hersteller = herstellerInput ? (herstellerInput.value || '') : '';
+                
+                console.log("Eingabewerte:", { laenge, breite, hoehe, betonart, preisProM3, hersteller });
+                
+                // Überprüfen, ob alle notwendigen Werte eingegeben wurden
+                if (isNaN(laenge) || isNaN(breite) || isNaN(hoehe) || laenge <= 0 || breite <= 0 || hoehe <= 0) {
+                    alert('Bitte geben Sie gültige Werte für Länge, Breite und Höhe ein.');
+                    return;
+                }
+                
+                // Volumen berechnen
+                const volumen = laenge * breite * hoehe;
+                console.log("Berechnetes Volumen:", volumen);
+                
+                // Dichte bestimmen
+                let dichte = 2400; // Standardwert für Standardbeton
+                let betonartText = 'Standardbeton';
+                const festigkeitsklasseSelect = document.getElementById('festigkeitsklasse');
+                let festigkeitsklasse = festigkeitsklasseSelect ? festigkeitsklasseSelect.value : '';
+                
+                console.log("Betonart:", betonart);
+                
+                // Eigene Betonsorte für später merken
+                let eigeneBetonsorte = null;
+                
+                if (betonart === 'wasserdicht') {
+                    dichte = 2400;
+                    betonartText = 'Wasserdichter Beton';
+                } else if (betonart === 'leicht_feuerfest') {
+                    dichte = 1000;
+                    betonartText = 'Leichter Feuerfestbeton';
+                    festigkeitsklasse = '';
+                } else if (betonart === 'mittel_feuerfest') {
+                    dichte = 1500;
+                    betonartText = 'Mittelschwerer Feuerfestbeton';
+                    festigkeitsklasse = '';
+                } else if (betonart === 'schwer_feuerfest') {
+                    dichte = 2000;
+                    betonartText = 'Schwerer Feuerfestbeton';
+                    festigkeitsklasse = '';
+                } else if (betonart === 'custom') {
+                    const dichteInput = document.getElementById('dichte');
+                    if (!dichteInput) {
+                        console.error("Dichtefeld nicht gefunden!");
+                        alert("Fehler: Das Feld für die eigene Dichte wurde nicht gefunden.");
+                        return;
+                    }
+                    
+                    dichte = parseFloat(dichteInput.value);
+                    if (isNaN(dichte) || dichte <= 0) {
+                        alert('Bitte geben Sie eine gültige Dichte ein.');
+                        return;
+                    }
+                    betonartText = 'Eigene Dichte (Feuerfestbeton)';
+                    festigkeitsklasse = '';
+                } else if (betonart.startsWith('eigen_')) {
+                    try {
+                        // Index der eigenen Betonsorte aus dem Wert extrahieren
+                        const index = parseInt(betonart.split('_')[1]);
+                        console.log("Eigene Betonsorte Index:", index, "Anzahl Betonsorten:", eigeneBetonsorten.length);
+                        
+                        if (index >= 0 && index < eigeneBetonsorten.length) {
+                            eigeneBetonsorte = eigeneBetonsorten[index];
+                            console.log("Ausgewählte eigene Betonsorte:", eigeneBetonsorte);
+                            
+                            dichte = eigeneBetonsorte.dichte;
+                            betonartText = `${eigeneBetonsorte.name} (${eigeneBetonsorte.hersteller})`;
+                            festigkeitsklasse = '';
+                            
+                            // Wenn ein Preis für die eigene Betonsorte gespeichert ist und kein Preis eingegeben wurde
+                            // Der Preis wird bereits in €/Tonne gespeichert
+                            if (eigeneBetonsorte.preis > 0 && preisProM3 === 0 && preisInput) {
+                                preisInput.value = eigeneBetonsorte.preis;
+                            }
+                        } else {
+                            console.error("Ungültiger Index für eigene Betonsorte:", index);
+                            alert("Fehler: Die ausgewählte Betonsorte wurde nicht gefunden.");
+                            return;
+                        }
+                    } catch (error) {
+                        console.error("Fehler beim Verarbeiten der eigenen Betonsorte:", error);
+                        alert("Fehler beim Verarbeiten der eigenen Betonsorte.");
+                        return;
+                    }
+                }
+                
+                console.log("Verwendete Dichte:", dichte);
+                
+                // Gewicht berechnen
+                const gewicht = volumen * dichte;
+                
+                // Preisberechnung
+                // Hier ist preisProM3 jetzt tatsächlich der Preis pro Tonne
+                // Umrechnung in Preis pro Kubikmeter und dann Berechnung des Gesamtpreises
+                const preisProKubikmeter = dichte > 0 ? (preisProM3 * dichte / 1000) : 0;
+                const gesamtpreis = volumen * preisProKubikmeter;
+                
+                console.log("Berechnetes Gewicht:", gewicht);
+                console.log("Berechneter Gesamtpreis:", gesamtpreis);
+                
+                // Ergebnis-Element suchen
+                const ergebnisElement = document.getElementById('ergebnis');
+                if (!ergebnisElement) {
+                    console.error("Ergebnis-Element nicht gefunden!");
+                    alert("Fehler: Das Ergebnis kann nicht angezeigt werden.");
+                    return;
+                }
+                
+                // Ergebnis anzeigen
+                let ergebnisText = `Berechnungsergebnis:
+                
+Volumen: ${volumen.toFixed(2)} m³
+Gewicht: ${gewicht.toFixed(2)} kg (${(gewicht / 1000).toFixed(2)} Tonnen)
+
+Betonart: ${betonartText}`;
+
+                if (festigkeitsklasse) {
+                    ergebnisText += `
+Festigkeitsklasse: ${festigkeitsklasse}`;
+                }
+
+                if (hersteller) {
+                    ergebnisText += `
+Hersteller/Bezeichnung: ${hersteller}`;
+                }
+
+                if (preisProM3 > 0) {
+                    // Berechne den Preis pro Kubikmeter aus dem Preis pro Tonne
+                    const preisProKubikmeter = preisProM3 * dichte / 1000;
+                    
+                    // Gesamtpreise berechnen
+                    const gesamtpreisTonnen = (gewicht / 1000) * preisProM3;
+                    const gesamtpreisKubikmeter = volumen * preisProKubikmeter;
+                    
+                    ergebnisText += `
+                    
+Preisberechnung:
+Preis pro Tonne: ${preisProM3.toFixed(2)} €
+Preis pro m³: ${preisProKubikmeter.toFixed(2)} €
+Gesamtpreis (${(gewicht / 1000).toFixed(2)} Tonnen): ${gesamtpreisTonnen.toFixed(2)} €`;
+                }
+                
+                // Lagerbestand und Bestellvorschlag berechnen, wenn eigene Betonsorte
+                let lagerBestandInfo = "";
+                let bestellVorschlag = "";
+                
+                if (eigeneBetonsorte) {
+                    // Lagerbestand anzeigen, wenn vorhanden
+                    if (eigeneBetonsorte.lagerbestand > 0) {
+                        // Umrechnung von Tonnen in Kubikmeter für die Anzeige
+                        const lagerbestandTonnen = eigeneBetonsorte.lagerbestand;
+                        const lagerbestandM3 = (eigeneBetonsorte.lagerbestand * 1000 / eigeneBetonsorte.dichte).toFixed(2);
+                        
+                        ergebnisText += `
+                
+Lagerbestand vorhanden: ${lagerbestandTonnen.toFixed(1)} Tonnen (${lagerbestandM3} m³)`;
+                        
+                        // Berechnen, ob genug Material im Lager ist
+                        const benoetigtesTonnage = gewicht / 1000; // von kg in Tonnen umrechnen
+                        
+                        if (benoetigtesTonnage > eigeneBetonsorte.lagerbestand) {
+                            // Nicht genug Material im Lager
+                            const fehlendeTonnen = benoetigtesTonnage - eigeneBetonsorte.lagerbestand;
+                            const fehlendeTonnenMitSicherheit = fehlendeTonnen * 1.15; // 15% Sicherheitszuschlag
+                            
+                            // Berechne Kosten, wenn ein Preis angegeben wurde
+                            let kostenInfo = '';
+                            if (preisProM3 > 0) {
+                                const kostenFehlendeMenge = fehlendeTonnen * preisProM3;
+                                const kostenFehlendeMitSicherheit = fehlendeTonnenMitSicherheit * preisProM3;
+                                kostenInfo = `
+Kosten der fehlenden Menge: ${kostenFehlendeMenge.toFixed(2)} €
+Kosten mit Sicherheitszuschlag: ${kostenFehlendeMitSicherheit.toFixed(2)} €`;
+                            }
+                            
+                            lagerBestandInfo = `
+                            
+ACHTUNG: Lagerbestand nicht ausreichend!
+Vorhandener Bestand: ${eigeneBetonsorte.lagerbestand.toFixed(2)} Tonnen
+Benötigte Menge: ${benoetigtesTonnage.toFixed(2)} Tonnen
+Fehlende Menge: ${fehlendeTonnen.toFixed(2)} Tonnen${kostenInfo}`;
+                            
+                            // Bestellvorschlag
+                            bestellVorschlag = `
+                            
+Bestellvorschlag:
+Exakte Bestellmenge: ${fehlendeTonnen.toFixed(2)} Tonnen
+Bestellmenge mit 15% Sicherheitszuschlag: ${fehlendeTonnenMitSicherheit.toFixed(2)} Tonnen`;
+                        } else {
+                            // Genug Material im Lager
+                            const verbleibendetonnen = (eigeneBetonsorte.lagerbestand - benoetigtesTonnage).toFixed(2);
+                            lagerBestandInfo = `
+                            
+Nach dieser Verwendung verbleiben noch ${verbleibendetonnen} Tonnen im Lager.`;
+                        }
+                    } else {
+                        // Kein Lagerbestand vorhanden
+                        const benoetigtesTonnage = gewicht / 1000; // von kg in Tonnen umrechnen
+                        const benoetigtMitSicherheit = benoetigtesTonnage * 1.15; // 15% Sicherheitszuschlag
+                        
+                        // Berechne Kosten, wenn ein Preis angegeben wurde
+                        let kostenInfo = '';
+                        if (preisProM3 > 0) {
+                            const kostenBenoetigteMenge = benoetigtesTonnage * preisProM3;
+                            const kostenMitSicherheit = benoetigtMitSicherheit * preisProM3;
+                            kostenInfo = `
+Kosten der benötigten Menge: ${kostenBenoetigteMenge.toFixed(2)} €
+Kosten mit Sicherheitszuschlag: ${kostenMitSicherheit.toFixed(2)} €`;
+                        }
+                        
+                        lagerBestandInfo = `
+                        
+Kein Lagerbestand vorhanden.
+Benötigte Menge: ${benoetigtesTonnage.toFixed(2)} Tonnen${kostenInfo}`;
+                        
+                        bestellVorschlag = `
+                        
+Bestellvorschlag:
+Exakte Bestellmenge: ${benoetigtesTonnage.toFixed(2)} Tonnen
+Bestellmenge mit 15% Sicherheitszuschlag: ${benoetigtMitSicherheit.toFixed(2)} Tonnen`;
+                    }
+                    
+                    // Verwendungszweck anzeigen, wenn vorhanden
+                    if (eigeneBetonsorte.verwendung && eigeneBetonsorte.verwendung !== 'Keine Angabe') {
+                        ergebnisText += `
+                
+Empfohlene Verwendung: ${eigeneBetonsorte.verwendung}`;
+                    }
+                }
+                
+                // Lagerbestandinfo und Bestellvorschlag zum Ergebnis hinzufügen
+                ergebnisText += lagerBestandInfo;
+                ergebnisText += bestellVorschlag;
+                
+                ergebnisElement.textContent = ergebnisText;
+                console.log("Berechnung erfolgreich abgeschlossen");
+                
+            } catch (error) {
+                console.error("Fehler bei der Betonberechnung:", error);
+                alert("Bei der Berechnung ist ein Fehler aufgetreten. Bitte überprüfen Sie Ihre Eingaben.");
+            }
+        }
+        
+        // Funktion zum Exportieren der Betonsorten als CSV
+        function exportiereAlsCSV() {
+            try {
+                console.log("Exportiere Betonsorten als CSV...");
+                
+                if (!eigeneBetonsorten || eigeneBetonsorten.length === 0) {
+                    alert("Es sind keine Betonsorten zum Exportieren vorhanden.");
+                    return;
+                }
+                
+                // CSV-Header
+                let csvInhalt = "Name,Hersteller,Dichte,Preis (€/Tonne),Lagerbestand (Tonnen),Verwendung\n";
+                
+                // CSV-Daten hinzufügen
+                eigeneBetonsorten.forEach(betonsorte => {
+                    // CSV-Werte vorbereiten (Anführungszeichen für Texte, Kommas in Texten behandeln)
+                    const name = `"${betonsorte.name.replace(/"/g, '""')}"`;
+                    const hersteller = `"${betonsorte.hersteller.replace(/"/g, '""')}"`;
+                    const dichte = betonsorte.dichte;
+                    const preis = betonsorte.preis;
+                    const lagerbestand = betonsorte.lagerbestand || 0;
+                    const verwendung = `"${betonsorte.verwendung.replace(/"/g, '""')}"`;
+                    
+                    csvInhalt += `${name},${hersteller},${dichte},${preis},${lagerbestand},${verwendung}\n`;
+                });
+                
+                console.log("CSV-Inhalt erstellt:", csvInhalt);
+                
+                // Datei erstellen und Download auslösen
+                const blob = new Blob([csvInhalt], { type: 'text/csv;charset=utf-8;' });
+                const dateiname = `betonsorten_${new Date().toISOString().slice(0, 10)}.csv`;
+                
+                // Download-Link erstellen
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', dateiname);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log("CSV-Export erfolgreich abgeschlossen");
+                
+            } catch (error) {
+                console.error("Fehler beim CSV-Export:", error);
+                alert("Beim Exportieren der Betonsorten ist ein Fehler aufgetreten.");
+            }
+        }
+        
+        // Funktion zum Anzeigen der CSV-Vorschau
+        function zeigeCSVVorschau() {
+            try {
+                console.log("Zeige CSV-Vorschau...");
+                
+                if (!eigeneBetonsorten || eigeneBetonsorten.length === 0) {
+                    alert("Es sind keine Betonsorten für eine Vorschau vorhanden.");
+                    return;
+                }
+                
+                // CSV-Header
+                let csvInhalt = "Name,Hersteller,Dichte,Preis,Lagerbestand (Tonnen),Verwendung\n";
+                
+                // CSV-Daten hinzufügen
+                eigeneBetonsorten.forEach(betonsorte => {
+                    // CSV-Werte vorbereiten
+                    const name = `"${betonsorte.name.replace(/"/g, '""')}"`;
+                    const hersteller = `"${betonsorte.hersteller.replace(/"/g, '""')}"`;
+                    const dichte = betonsorte.dichte;
+                    const preis = betonsorte.preis;
+                    const lagerbestand = betonsorte.lagerbestand || 0;
+                    const verwendung = `"${betonsorte.verwendung.replace(/"/g, '""')}"`;
+                    
+                    csvInhalt += `${name},${hersteller},${dichte},${preis},${lagerbestand},${verwendung}\n`;
+                });
+                
+                // Vorschau anzeigen
+                const vorschauElement = document.getElementById('csvVorschau');
+                const textElement = document.getElementById('csvVorschauText');
+                
+                if (vorschauElement && textElement) {
+                    textElement.value = csvInhalt;
+                    vorschauElement.style.display = 'block';
+                } else {
+                    console.error("Vorschau-Elemente nicht gefunden!");
+                    alert("Die CSV-Vorschau kann nicht angezeigt werden.");
+                }
+                
+            } catch (error) {
+                console.error("Fehler bei der CSV-Vorschau:", error);
+                alert("Bei der Anzeige der CSV-Vorschau ist ein Fehler aufgetreten.");
+            }
+        }
+        
+        // Funktion zum Anzeigen des Dateinamens der ausgewählten CSV-Datei
+        function zeigeCSVDateiName() {
+            const dateiFeld = document.getElementById('csvDatei');
+            if (dateiFeld && dateiFeld.files.length > 0) {
+                const dateiname = dateiFeld.files[0].name;
+                console.log("Ausgewählte CSV-Datei:", dateiname);
+                
+                const label = dateiFeld.previousElementSibling;
+                if (label && label.tagName === 'LABEL') {
+                    label.textContent = `CSV-Datei importieren (${dateiname}):`;
+                }
+            }
+        }
+        
+        // Funktion zum Importieren der CSV-Datei
+        function importiereCSV() {
+            try {
+                console.log("Importiere CSV-Datei...");
+                
+                const dateiFeld = document.getElementById('csvDatei');
+                if (!dateiFeld || dateiFeld.files.length === 0) {
+                    alert("Bitte wählen Sie eine CSV-Datei aus.");
+                    return;
+                }
+                
+                const datei = dateiFeld.files[0];
+                const leser = new FileReader();
+                
+                leser.onload = function(event) {
+                    try {
+                        const csvInhalt = event.target.result;
+                        console.log("CSV-Datei gelesen:", csvInhalt.substring(0, 100) + "...");
+                        
+                        // CSV-Inhalt verarbeiten
+                        const zeilen = csvInhalt.split('\n');
+                        
+                        // Überprüfen, ob Header vorhanden ist
+                        if (zeilen.length < 2) {
+                            alert("Die CSV-Datei enthält keine gültigen Daten.");
+                            return;
+                        }
+                        
+                        // Header überprüfen
+                        const header = zeilen[0].trim().toLowerCase();
+                        // Unterstütze sowohl den alten Header (ohne Lagerbestand) als auch den neuen
+                        const akzeptierteHeader = [
+                            "name,hersteller,dichte,preis,lagerbestand (tonnen),verwendung",
+                            "name,hersteller,dichte,preis,lagerbestand,verwendung",
+                            "name,hersteller,dichte,preis,verwendung"
+                        ];
+                        
+                        const headerOk = akzeptierteHeader.some(h => header.includes(h) || h.includes(header));
+                        
+                        if (!headerOk) {
+                            console.warn("Unerwarteter CSV-Header:", header);
+                            if (!confirm("Der CSV-Header entspricht nicht dem erwarteten Format. Trotzdem fortfahren?")) {
+                                return;
+                            }
+                        }
+                        
+                        // Daten einlesen
+                        const neueBetonsorten = [];
+                        let fehler = 0;
+                        
+                        // Ab Zeile 1 (nach dem Header) beginnen
+                        for (let i = 1; i < zeilen.length; i++) {
+                            const zeile = zeilen[i].trim();
+                            if (!zeile) continue; // Leere Zeilen überspringen
+                            
+                            // CSV-Zeile parsen (berücksichtigt Anführungszeichen und Kommas in Feldern)
+                            const werte = parseCSVZeile(zeile);
+                            
+                            if (werte.length >= 5) {
+                                const name = werte[0];
+                                const hersteller = werte[1];
+                                const dichte = parseFloat(werte[2]);
+                                const preis = parseFloat(werte[3]);
+                                
+                                // Lagerbestand und Verwendung je nach Headerformat bestimmen
+                                let lagerbestand = 0;
+                                let verwendung = '';
+                                
+                                if (werte.length >= 6) {
+                                    // Neues Format mit Lagerbestand
+                                    lagerbestand = parseFloat(werte[4]);
+                                    verwendung = werte[5];
+                                } else {
+                                    // Altes Format ohne Lagerbestand
+                                    verwendung = werte[4];
+                                }
+                                
+                                if (name && !isNaN(dichte)) {
+                                    neueBetonsorten.push({
+                                        name: name,
+                                        hersteller: hersteller || "Nicht angegeben",
+                                        dichte: dichte,
+                                        preis: isNaN(preis) ? 0 : preis,
+                                        lagerbestand: isNaN(lagerbestand) ? 0 : lagerbestand,
+                                        verwendung: verwendung || "Keine Angabe"
+                                    });
+                                } else {
+                                    fehler++;
+                                    console.error("Ungültige Daten in Zeile", i + 1, ":", zeile);
+                                }
+                            } else {
+                                fehler++;
+                                console.error("Ungültiges Format in Zeile", i + 1, ":", zeile);
+                            }
+                        }
+                        
+                        console.log("Geparste Betonsorten:", neueBetonsorten);
+                        
+                        // Prüfen, ob Daten gelesen wurden
+                        if (neueBetonsorten.length === 0) {
+                            alert("Es konnten keine gültigen Betonsorten aus der CSV-Datei gelesen werden.");
+                            return;
+                        }
+                        
+                        // Fragen, ob die vorhandenen Betonsorten ersetzt oder ergänzt werden sollen
+                        let aktion = "ergänzen";
+                        if (eigeneBetonsorten.length > 0) {
+                            const optionen = ["ergänzen", "ersetzen", "abbrechen"];
+                            const auswahl = prompt(
+                                `Es wurden ${neueBetonsorten.length} Betonsorten in der CSV-Datei gefunden.\n` +
+                                `Sie haben bereits ${eigeneBetonsorten.length} gespeicherte Betonsorten.\n\n` +
+                                `Geben Sie an, was mit den neuen Daten geschehen soll:\n` +
+                                `- "ergänzen" (Standard): Neue Betonsorten zu bestehenden hinzufügen\n` +
+                                `- "ersetzen": Bestehende Betonsorten durch neue ersetzen\n` +
+                                `- "abbrechen": Import abbrechen`,
+                                "ergänzen"
+                            );
+                            
+                            if (auswahl === null || !optionen.includes(auswahl.toLowerCase())) {
+                                console.log("Import abgebrochen durch Benutzer oder ungültige Eingabe");
+                                return;
+                            }
+                            
+                            aktion = auswahl.toLowerCase();
+                        }
+                        
+                        if (aktion === "abbrechen") {
+                            console.log("Import abgebrochen durch Benutzer");
+                            return;
+                        }
+                        
+                        // Daten übernehmen
+                        if (aktion === "ersetzen") {
+                            eigeneBetonsorten = [...neueBetonsorten];
+                        } else { // ergänzen
+                            eigeneBetonsorten = [...eigeneBetonsorten, ...neueBetonsorten];
+                        }
+                        
+                        // Daten speichern und UI aktualisieren
+                        speichereEigeneBetonsorten();
+                        aktualisiereBetonsortenListe();
+                        erstelleBetonsortenTabelle();
+                        
+                        // Erfolgsmeldung anzeigen
+                        let meldung = `${neueBetonsorten.length} Betonsorten wurden erfolgreich importiert`;
+                        if (fehler > 0) {
+                            meldung += ` (${fehler} ungültige Zeilen wurden ignoriert)`;
+                        }
+                        alert(meldung);
+                        
+                        // Dateiauswahl zurücksetzen
+                        dateiFeld.value = "";
+                        const label = dateiFeld.previousElementSibling;
+                        if (label && label.tagName === 'LABEL') {
+                            label.textContent = "CSV-Datei importieren:";
+                        }
+                        
+                    } catch (error) {
+                        console.error("Fehler beim Verarbeiten der CSV-Datei:", error);
+                        alert("Die CSV-Datei konnte nicht verarbeitet werden: " + error.message);
+                    }
+                };
+                
+                leser.onerror = function() {
+                    console.error("Fehler beim Lesen der CSV-Datei");
+                    alert("Die CSV-Datei konnte nicht gelesen werden.");
+                };
+                
+                leser.readAsText(datei);
+                
+            } catch (error) {
+                console.error("Fehler beim CSV-Import:", error);
+                alert("Beim Importieren der CSV-Datei ist ein Fehler aufgetreten.");
+            }
+        }
+        
+        // Hilfsfunktion zum Parsen einer CSV-Zeile (berücksichtigt Anführungszeichen und Kommas)
+        function parseCSVZeile(zeile) {
+            const ergebnis = [];
+            let iAnfuehrungszeichen = false;
+            let aktuellesWert = "";
+            
+            for (let i = 0; i < zeile.length; i++) {
+                const zeichen = zeile[i];
+                
+                if (zeichen === '"') {
+                    if (i < zeile.length - 1 && zeile[i + 1] === '"') {
+                        // Doppelte Anführungszeichen zu einem reduzieren
+                        aktuellesWert += '"';
+                        i++; // Zweites Anführungszeichen überspringen
+                    } else {
+                        // Anführungszeichen umschalten
+                        iAnfuehrungszeichen = !iAnfuehrungszeichen;
+                    }
+                } else if (zeichen === ',' && !iAnfuehrungszeichen) {
+                    // Feldtrenner, wenn nicht in Anführungszeichen
+                    ergebnis.push(aktuellesWert);
+                    aktuellesWert = "";
+                } else {
+                    // Normales Zeichen
+                    aktuellesWert += zeichen;
+                }
+            }
+            
+            // Letztes Feld hinzufügen
+            ergebnis.push(aktuellesWert);
+            
+            return ergebnis;
+        }
+        
+        // Debug-Hilfsfunktion
+        function testLocalStorage() {
+            try {
+                localStorage.setItem('test', 'test');
+                const testWert = localStorage.getItem('test');
+                if (testWert === 'test') {
+                    console.log("localStorage funktioniert korrekt!");
+                    localStorage.removeItem('test');
+                } else {
+                    console.error("localStorage funktioniert nicht richtig!");
+                }
+            } catch (e) {
+                console.error("localStorage ist nicht verfügbar:", e);
+            }
+        }
+        
+        // Prüfen, ob localStorage funktioniert
+        testLocalStorage();
+    </script>
+</body>
+</html>
